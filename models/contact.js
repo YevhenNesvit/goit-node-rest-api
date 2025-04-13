@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../db/db.js";
+import User from "./user.js";
 
 const Contact = sequelize.define("Contact", {
   name: {
@@ -18,8 +19,16 @@ const Contact = sequelize.define("Contact", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  owner: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 });
 
-sequelize.sync();
+// Встановлюємо зв'язок між User і Contact
+Contact.belongsTo(User, { foreignKey: "owner" });
+User.hasMany(Contact, { foreignKey: "owner" });
+
+// sequelize.sync({ force: true });
 
 export default Contact;

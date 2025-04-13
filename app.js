@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 
 import { connectDB } from "./db/db.js";
 import contactsRouter from "./routes/contactsRouter.js";
+import authRouter from "./routes/authRouter.js";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/auth", authRouter);
 app.use("/api/contacts", contactsRouter);
 
 app.use((_, res) => {

@@ -1,8 +1,21 @@
 import Contact from "../models/contact.js";
 
-async function listContacts() {
+async function listContacts(userId, query = {}) {
   try {
-    const contacts = await Contact.findAll();
+    const { page = 1, limit = 20, favorite } = query;
+
+    const options = {
+      where: { owner: userId },
+      offset: (page - 1) * limit,
+      limit: parseInt(limit),
+    };
+
+    // Додаємо фільтрацію за полем favorite, якщо вказано
+    if (favorite !== undefined) {
+      options.where.favorite = favorite === "true";
+    }
+
+    const contacts = await Contact.findAll(options);
     return contacts;
   } catch (error) {
     console.error("Error reading contacts:", error);
@@ -10,9 +23,11 @@ async function listContacts() {
   }
 }
 
-async function getContactById(contactId) {
+async function getContactById(contactId, userId) {
   try {
-    const contact = await Contact.findByPk(contactId);
+    const contact = await Contact.findOne({
+      where: { id: contactId, owner: userId },
+    });
     return contact || null;
   } catch (error) {
     console.error("Error getting contact by ID:", error);
@@ -20,10 +35,12 @@ async function getContactById(contactId) {
   }
 }
 
-async function removeContact(contactId) {
+async function removeContact(contactId, userId) {
   try {
-    const contact = await Contact.findByPk(contactId);
-    
+    const contact = await Contact.findOne({
+      where: { id: contactId, owner: userId },
+    });
+
     if (!contact) {
       return null;
     }
@@ -36,12 +53,13 @@ async function removeContact(contactId) {
   }
 }
 
-async function addContact(name, email, phone) {
+async function addContact(name, email, phone, userId) {
   try {
     const newContact = await Contact.create({
       name,
       email,
       phone,
+      owner: userId,
     });
 
     return newContact;
@@ -51,10 +69,12 @@ async function addContact(name, email, phone) {
   }
 }
 
-async function updateContact(contactId, data) {
+async function updateContact(contactId, data, userId) {
   try {
-    const contact = await Contact.findByPk(contactId);
-    
+    const contact = await Contact.findOne({
+      where: { id: contactId, owner: userId },
+    });
+
     if (!contact) {
       return null;
     }
@@ -67,10 +87,12 @@ async function updateContact(contactId, data) {
   }
 }
 
-async function updateStatusContact(contactId, { favorite }) {
+async function updateStatusContact(contactId, { favorite }, userId) {
   try {
-    const contact = await Contact.findByPk(contactId);
-    
+    const contact = await Contact.findOne({
+      where: { id: contactId, owner: userId },
+    });
+
     if (!contact) {
       return null;
     }
