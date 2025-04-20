@@ -91,3 +91,22 @@ export const updateSubscription = [
     }
   },
 ];
+
+export const updateAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      throw HttpError(400, "Avatar is required");
+    }
+
+    const userId = req.user.id;
+    const result = await authService.updateAvatar(userId, req.file.path);
+
+    if (result.error) {
+      return next(HttpError(result.error.status, result.error.message));
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -7,6 +7,9 @@ import { connectDB } from "./db/db.js";
 import contactsRouter from "./routes/contactsRouter.js";
 import authRouter from "./routes/authRouter.js";
 
+import path from "path";
+import { fileURLToPath } from "url";
+
 dotenv.config();
 
 connectDB();
@@ -15,6 +18,11 @@ const app = express();
 
 app.use(morgan("tiny"));
 app.use(cors());
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, "public")));
+
 app.use(express.json());
 
 app.use("/api/auth", authRouter);
@@ -29,8 +37,4 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server is running. Use our API on port: ${PORT}`);
-});
+export default app;
