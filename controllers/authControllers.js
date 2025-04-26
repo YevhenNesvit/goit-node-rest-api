@@ -4,6 +4,7 @@ import {
   registerSchema,
   loginSchema,
   subscriptionSchema,
+  verifyEmailSchema,
 } from "../schemas/authSchemas.js";
 import HttpError from "../helpers/HttpError.js";
 
@@ -31,6 +32,39 @@ export const login = [
     try {
       const { email, password } = req.body;
       const result = await authService.loginUser(email, password);
+
+      if (result.error) {
+        return next(HttpError(result.error.status, result.error.message));
+      }
+
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+];
+
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    const result = await authService.verifyEmail(verificationToken);
+
+    if (result.error) {
+      return next(HttpError(result.error.status, result.error.message));
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resendVerificationEmail = [
+  validateBody(verifyEmailSchema),
+  async (req, res, next) => {
+    try {
+      const { email } = req.body;
+      const result = await authService.resendVerificationEmail(email);
 
       if (result.error) {
         return next(HttpError(result.error.status, result.error.message));
